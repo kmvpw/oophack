@@ -98,6 +98,7 @@ def create_character(things):
     for i in range(NUM_CHARACTER):
         name = random.choice(NAMES)
         defence = round(random.uniform(MIN_PERSON_DEFENCE, MAX_PERSON_DEFENCE), 2)
+        ### Требутся изменение при добавлении новых рас
         if random.choice([True, False]):
             character = Paladin(name, HIT_POINTS, ATTACK_DAMAGE, defence)
         else:
@@ -116,28 +117,31 @@ def main():
     while True:
         if len(characters) == 1:
             break
-        print('..........Список участников.............')
+        print()
+        print('--------Список участников--------')
         for character in characters:
-            print(character)
-        print('........................................')
+            print(f'    {character}')
+        print('---------------------------------')
+        print()
         attacker = characters.pop(random.randint(0, len(characters) - 1))
         defender = characters.pop(random.randint(0, len(characters) - 1))
-        print(f'....Сражение {attacker.name} с {defender.name}....')
-
+        print(f'|x      Сражение {attacker.name} с {defender.name}      x')
+        print('|')
         while defender.hit_points > 0:
             defender.update_hit_points(attacker.attack_damage)
             print(
-                f'{attacker.name}, нанёс урон {defender.name}: {attacker.attack_damage}'
+                f'|  {attacker.name}, нанёс урон {defender.name}: {attacker.attack_damage}'
             )
             if defender.hit_points <= 0:
                 characters.append(attacker)
-                print(f'Победитель {attacker}')
+                print(f'|Победитель {attacker}')
                 break
             else:
                 attacker, defender = defender, attacker
 
     winner = characters[0]
-    print(f'...........{winner} победитель арены...............')
+    print()
+    print(f'...........{winner.name} победитель арены...............')
 
 
 if __name__ == '__main__':
