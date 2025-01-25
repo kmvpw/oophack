@@ -21,6 +21,8 @@ MIN_THING_ATTACK = 10
 MAX_THING_ATTACK = 30
 MIN_THING_DEFENCE = 0.01
 MAX_THING_DEFENCE = 0.1
+MIN_PERSON_DEFENCE = 0.01
+MAX_PERSON_DEFENCE = 0.1
 
 
 class Thing:
@@ -83,21 +85,19 @@ def create_things():
     things = []
     for i in range(NUM_THING):
         name = random.choice(THINGS)
-        attack = random.randint(10, 30)
-        hit_points = random.randint(10, 100)
-        defence = round(random.uniform(0.01, 0.1), 2)
+        attack = random.randint(MIN_THING_ATTACK, MAX_THING_ATTACK)
+        hit_points = random.randint(MIN_THING_HIT_POINTS, MAX_THING_HIT_POINTS)
+        defence = round(random.uniform(MIN_THING_DEFENCE, MAX_THING_DEFENCE), 2)
         thing = Thing(name, defence, hit_points, attack)
         things.append(thing)
     sorted(things, key=lambda x: x.defence)
     return things
 
-
 def create_character(things):
     characters = []
     for i in range(NUM_CHARACTER):
         name = random.choice(NAMES)
-        defence = round(random.uniform(0.01, 0.10), 2)
-        ### Требутся изменение при добавлении новых рас
+        defence = round(random.uniform(MIN_PERSON_DEFENCE, MAX_PERSON_DEFENCE), 2)
         if random.choice([True, False]):
             character = Paladin(name, HIT_POINTS, ATTACK_DAMAGE, defence)
         else:
