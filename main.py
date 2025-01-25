@@ -1,7 +1,7 @@
 import random
 
 HIT_POINTS = 100
-ATTACK_DAMAGE = 10
+ATTACK_DAMAGE = 100
 NAMES = [
     'Alexander', 'Isabella', 'Liam', 'Olivia', 'Ethan', 'Sophia', 'Mason',
     'Ava', 'Logan', 'Mia', 'Lucas', 'Amelia', 'Jackson', 'Harper', 'Aiden',
@@ -15,6 +15,12 @@ THINGS = [
     'wand'
 ]
 NUMBER_OF_FIGHTERS = 2
+MIN_THING_HIT_POINTS = 10
+MAX_THING_HIT_POINTS = 100
+MIN_THING_ATTACK = 10
+MAX_THING_ATTACK = 30
+MIN_THING_DEFENCE = 0.01
+MAX_THING_DEFENCE = 0.1
 
 
 class Thing:
@@ -59,10 +65,8 @@ class Paladin(Person):
 
     def __str__(self):
         return f'Паладин {self.name} [{self.hit_points}, {self.attack_damage}, {self.defence}]'
-    
     def __repr__(self) -> str:
         return f'Воин {self.name}'
-
 
 class Warrior(Person):
 
@@ -72,19 +76,17 @@ class Warrior(Person):
 
     def __str__(self):
         return f'Воин {self.name} [{self.hit_points}, {self.attack_damage}, {self.defence}]'
-    
     def __repr__(self) -> str:
         return f'Воин {self.name}'
-
 
 def create_things():
     things = []
     for i in range(NUM_THING):
         name = random.choice(THINGS)
-        attack = random.randint(10, 100)
-        health = random.randint(10, 100)
-        defence = round(random.uniform(0.01, 0.10), 2)
-        thing = Thing(name, defence, health, attack)
+        attack = random.randint(10, 30)
+        hit_points = random.randint(10, 100)
+        defence = round(random.uniform(0.01, 0.1), 2)
+        thing = Thing(name, defence, hit_points, attack)
         things.append(thing)
     sorted(things, key=lambda x: x.defence)
     return things
@@ -95,6 +97,7 @@ def create_character(things):
     for i in range(NUM_CHARACTER):
         name = random.choice(NAMES)
         defence = round(random.uniform(0.01, 0.10), 2)
+        ### Требутся изменение при добавлении новых рас
         if random.choice([True, False]):
             character = Paladin(name, HIT_POINTS, ATTACK_DAMAGE, defence)
         else:
@@ -118,7 +121,6 @@ def main():
             print(character)
         print('........................................')
         attacker = characters.pop(random.randint(0, len(characters) - 1))
-        print(characters)
         defender = characters.pop(random.randint(0, len(characters) - 1))
         print(f'....Сражение {attacker.name} с {defender.name}....')
 
@@ -131,9 +133,9 @@ def main():
                 characters.append(attacker)
                 print(f'Победитель {attacker}')
                 break
-            attacker, defender = defender, attacker
-            if len(characters) == 1:
-                break
+            else:
+                attacker, defender = defender, attacker
+
     winner = characters[0]
     print(f'...........{winner} победитель арены...............')
 
