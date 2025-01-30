@@ -1,0 +1,202 @@
+from random import sample, randint, uniform, choice
+
+NUM_CHARACTER = 10  # число героев.
+THINGS_CONSTRAINTS = 4  # максимальное число предметов на герое.
+NUM_THING = NUM_CHARACTER * THINGS_CONSTRAINTS  # число предметов на арене.
+NAMES = [
+    'Каст Штормовой Лис', 'Тов Крушитель Голов', 'Ревен Золотая Кровь',
+    'Нурнхильда Чёрный Щит', 'Болфрида Кровавый Клинок', 'Лютерий Джаконис',
+    'Климмек Усталый', 'Роберто Кингинг', 'Батмар Каменная Рука', 'Люсия Нитт',
+    'Теодард Гаерстон', 'Колетта Лиоре', 'Люсия Нитт', 'Бернадетт Копперсмит',
+    'Хафьорг', 'Джанония Кололлий', 'Орла Лошадиная Пасть', 'Констант Аксий'
+]  # имена героев.
+HIT_POINTS = 100  # стандартное здоровье персонажа.
+ATTACK_DAMAGE = 30  # стандартная атака персонажа.
+MIN_PERSON_DEFENCE = 0.1  # минимальная защита персонажа.
+MAX_PERSON_DEFENCE = 0.4  # максиальная защита персонажа.
+THINGS = [
+    'щит', 'броня', 'шлем',
+    'кольцо',  'свиток', 'амулет',
+    'меч', 'кинжал', 'посох',
+]  # предметы для героев.
+MIN_THING_HIT_POINTS = 10  # минимальная прибавка к здоровью.
+MAX_THING_HIT_POINTS = 100  # максиальная прибавка к здоровью.
+MIN_THING_ATTACK = 10  # минимальная прибавка к атаке.
+MAX_THING_ATTACK = 30  # максиальная прибавка к атаке.
+MIN_THING_DEFENCE = 0.01  # минимальная прибавка к ащите.
+MAX_THING_DEFENCE = 0.1  # максиальная прибавка к ащите.
+
+
+class Thing:
+    """Класс предмета, который может надеть или использовать персонаж.
+    Содержит атрибуты: имя, защита, здоровье, сила атаки."""
+    def __init__(
+            self, name: str, hit_points: int,
+            attack_damage: int, defence: float
+    ) -> None:
+        self.name = name
+        self.defence = defence
+        self.hit_points = hit_points
+        self.attack_damage = attack_damage
+
+    def __str__(self) -> str:
+        return (
+            f'{self.name} (+{self.hit_points}, '
+            f'+{self.attack_damage}, +{int(self.defence * 100)}%)'
+        )
+
+
+class Person:
+    """Класс персонажа, содержащий в себе следующие параметры:
+    Имя, кол-во hp/жизней, базовую атаку, базовый процент защиты."""
+    race = 'Персонаж'
+
+    def __init__(
+            self, name: str, hit_points: int,
+            attack_damage: int, defence: float
+    ) -> None:
+        self.name = name
+        self.hit_points = hit_points
+        self.attack_damage = attack_damage
+        self.defence = defence
+        self.things: list = []
+
+    def set_things(self, things) -> None:
+        for thing in things:
+            self.things.append(thing)
+            self.hit_points = round(self.hit_points + thing.hit_points, 2)
+            self.attack_damage += thing.attack_damage
+            self.defence = round(self.defence + thing.defence, 2)
+
+    def get_damage(self, attack_damage) -> int:
+        final_damage = attack_damage - int(attack_damage * self.defence)
+        if final_damage > self.hit_points:
+            return self.hit_points
+        else:
+            return final_damage
+
+    def update_hit_points(self, attack_damage) -> None:
+        self.hit_points = self.hit_points - self.get_damage(attack_damage)
+
+    @property
+    def full_name(self) -> str:
+        return f'{self.race} {self.name}'
+
+    def __str__(self) -> str:
+        return (
+            f'{self.full_name} ({self.hit_points}, '
+            f'{self.attack_damage}, {int(self.defence * 100)}%)'
+        )
+
+    def __repr__(self) -> str:
+        return f'{self.full_name}'
+
+
+class Paladin(Person):
+    """Класс расы - паладин. Здоровье и защита увеличены вдвое"""
+    race = 'Паладин'
+
+    def __init__(self, name, hit_points, attack_damage, defence) -> None:
+        hit_points *= 2
+        defence *= 2
+        super().__init__(name, hit_points, attack_damage, defence)
+
+
+class Warrior(Person):
+    """Класс расы - воин. Атака увеличена вдвое"""
+    race = 'Воин'
+
+    def __init__(self, name, hit_points, attack_damage, defence) -> None:
+        attack_damage *= 2
+        super().__init__(name, hit_points, attack_damage, defence)
+
+
+def create_things() -> list:
+    """Случайная генерация предметов, доступных героям на арене."""
+    things = []
+    for i in range(NUM_THING):
+        name = choice(THINGS)
+        hit_points = randint(MIN_THING_HIT_POINTS, MAX_THING_HIT_POINTS)
+        attack = randint(MIN_THING_ATTACK, MAX_THING_ATTACK)
+        defence = round(uniform(MIN_THING_DEFENCE, MAX_THING_DEFENCE), 2)
+        thing = Thing(name, hit_points, attack, defence)
+        things.append(thing)
+    sorted(things, key=lambda x: x.defence)
+    return things
+
+
+def create_character(things) -> list:
+    """Случайная генерация героев арены."""
+    characters = []
+    for i in range(NUM_CHARACTER):
+        name = choice(NAMES)
+        defence = round(uniform(MIN_PERSON_DEFENCE, MAX_PERSON_DEFENCE), 2)
+        stats = (name, HIT_POINTS, ATTACK_DAMAGE, defence)
+        character = choice([Paladin(*stats), Warrior(*stats)])
+        things = sample(things, THINGS_CONSTRAINTS)
+        characters.append(character)
+    return characters
+
+
+def main():
+    print('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n')
+    print('||||||||||||||||Добро пожаловать на Арену||||||||||||||||\n')
+    print('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n')
+    things = create_things()
+    characters = create_character(things)
+    print('Список участников [имя (здоровье, атака, защита) и предметы]:')
+    for i, character in enumerate(characters):
+        print(f'{i+1}. {character}')
+        chosen_things = []
+        for i in range((randint(1, THINGS_CONSTRAINTS))):
+            thing_id = randint(0, len(things)-1)
+            chosen_things.append(things.pop(thing_id))
+        character.set_things(chosen_things)
+        for thing in character.things:
+            print(f'    |{thing}|')
+    print()
+    while True:
+        if len(characters) == 1:
+            break
+        print(
+            f'==============Текущее число участников: '
+            f'{len(characters)}================'
+        )
+        print()
+        opponents = []
+        for i in range(2):
+            character_id = randint(0, len(characters)-1)
+            opponents.append(characters.pop(character_id))
+        attacker = opponents.pop(randint(0, 1))
+        defender = opponents.pop()
+        print('|||_____________________Сражение______________________|||')
+        print(f'|||{attacker.full_name} против {defender.full_name}|||')
+        while defender.hit_points > 0:
+            print(
+                f'|X| {attacker.full_name} ({attacker.hit_points}) атакует на '
+                f'{attacker.attack_damage} ед. урона.'
+            )
+            final_damage = defender.get_damage(attacker.attack_damage)
+
+            print(
+                f'|O| {defender.full_name} ({defender.hit_points}) получил '
+                f'{final_damage} ед. урона.'
+            )
+            defender.update_hit_points(attacker.attack_damage)
+            if defender.hit_points <= 0:
+                characters.append(attacker)
+                print(
+                    f'|W|______Победитель: {attacker.full_name}______|W|\n'
+                )
+                break
+            else:
+                attacker, defender = defender, attacker
+
+    winner = characters[0]
+    print('|-------------------------------------------------------|')
+    print(f'|С|------{winner.full_name} чемпион арены------|С|')
+    print('|-------------------------------------------------------|')
+
+
+if __name__ == '__main__':
+    main()
